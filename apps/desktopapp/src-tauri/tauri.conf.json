@@ -1,0 +1,25 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Sentinel Desktop",
+  "version": "0.1.0",
+  "identifier": "com.jamarq.sentinel.desktop",
+  "build": {
+    "beforeDevCommand": "pnpm --filter @sentinel/desktopapp run dev",
+    "beforeBuildCommand": "pnpm --filter @sentinel/desktopapp run build:ui",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Sentinel Desktop",
+        "width": 1320,
+        "height": 900,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  }
+}

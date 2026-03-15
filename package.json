@@ -1,0 +1,35 @@
+{
+  "name": "sentinel",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.32.1",
+  "engines": {
+    "node": ">=22.21.0"
+  },
+  "scripts": {
+    "bootstrap": "./scripts/bootstrap.sh",
+    "check:env": "./scripts/check-env.sh",
+    "check:packages": "./scripts/check-packages.sh",
+    "dev:web": "./scripts/dev-web.sh",
+    "dev:desktop": "./scripts/dev-desktop.sh",
+    "dev:mobile": "./scripts/dev-mobile.sh",
+    "dev:both": "./scripts/dev-both.sh",
+    "verify:web": "./scripts/verify-web.sh",
+    "verify:desktop": "./scripts/verify-desktop.sh",
+    "verify:mobile": "./scripts/verify-mobile.sh",
+    "verify:all": "./scripts/verify-all.sh",
+    "doctor": "./scripts/doctor.sh",
+    "lint": "pnpm exec eslint .",
+    "typecheck:packages": "pnpm -r --filter './packages/*' run typecheck",
+    "typecheck": "pnpm run typecheck:packages && pnpm --filter @sentinel/webapp run typecheck && pnpm --filter @sentinel/desktopapp run typecheck && pnpm --filter @sentinel/mobileapp run typecheck",
+    "build": "pnpm run verify:all"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.20.0",
+    "globals": "^15.14.0",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.24.1"
+  }
+}

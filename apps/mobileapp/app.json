@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Sentinel Mobile",
+    "slug": "sentinel-mobile",
+    "scheme": "sentinel",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.jamarq.sentinel.mobile"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#f4efe5"
+      },
+      "package": "com.jamarq.sentinel.mobile"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
