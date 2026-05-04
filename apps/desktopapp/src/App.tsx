@@ -25,10 +25,10 @@ export default function App() {
     <main className="desktop-shell">
       <header className="desktop-header">
         <div>
-          <span className="desktop-eyebrow">Operator surface</span>
+          <span className="desktop-eyebrow">Desktop operations</span>
           <h1>{sentinelAppName} Desktop</h1>
           <p>
-            Thin admin shell for queue visibility, assessment review, and source operations.
+            Queue visibility, assessment review, source status, and operational settings.
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export default function App() {
           style={{ borderColor: riskLevelToneMap.unknown.accent }}
         >
           <strong>Current posture</strong>
-          <p>Desktop workflows are scaffolded and ready for the first real operator use cases.</p>
+          <p>Desktop is prepared for queue review, source checks, and assessment triage.</p>
         </div>
       </header>
 
@@ -57,7 +57,7 @@ export default function App() {
             style={{ background: sentinelTokens.color.accent }}
           />
           Shared packages hold domain logic, validation, contracts, and privacy helpers so
-          this desktop shell can remain operationally focused.
+          this desktop channel can remain operationally focused.
         </div>
       </section>
     </main>

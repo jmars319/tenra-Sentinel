@@ -7,16 +7,15 @@ export default function App() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />
       <View style={styles.card}>
-        <Text style={styles.eyebrow}>Mobile shell</Text>
+        <Text style={styles.eyebrow}>Mobile channel</Text>
         <Text style={styles.title}>{sentinelAppName} Mobile</Text>
         <Text style={styles.body}>
-          Thin Expo scaffold for future mobile intake, operator review, and safe field use.
+          Mobile is reserved for intake, review, and field checks once source workflows are active.
         </Text>
         <View style={styles.panel}>
           <Text style={styles.panelTitle}>Current intent</Text>
           <Text style={styles.panelBody}>
-            Keep mobile valid, calm, and minimal until the first real mobile workflow is
-            defined.
+            Desktop and web remain the primary review channels while mobile focuses on field-ready checks.
           </Text>
         </View>
       </View>

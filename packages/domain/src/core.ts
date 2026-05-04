@@ -181,7 +181,7 @@ export const createInsufficientSignalAssessment = (input: {
   const evidence = input.evidence ?? [];
   const note =
     input.note ??
-    "tenra Sentinel has not gathered enough corroborated signals to move beyond a neutral, explainable placeholder assessment.";
+    "tenra Sentinel has not gathered enough corroborated signals to move beyond a neutral, explainable assessment.";
 
   return {
     level: "unknown",

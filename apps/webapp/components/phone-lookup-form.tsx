@@ -79,7 +79,7 @@ export function PhoneLookupForm() {
 
           <label className="field">
             <span>Mode</span>
-            <input value="Placeholder flow" readOnly />
+            <input value="Source review" readOnly />
           </label>
         </div>
 

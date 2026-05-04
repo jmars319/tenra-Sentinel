@@ -19,7 +19,7 @@ const sourceReadiness = [
 const statusPanels = [
   {
     title: "Current lookup path",
-    body: "Phone-number lookup is scaffolded end to end with a placeholder API boundary and shared request/response contracts."
+    body: "Phone-number lookup uses the shared request/response contracts that future source connectors will extend."
   },
   {
     title: "Next integration layer",
@@ -37,8 +37,7 @@ export default function HomePage() {
           <p>{sentinelTagline}</p>
           <p>
             The initial product surface is a suspicious phone-number lookup flow. The
-            scaffold stops short of pretending to know more than the connected signals can
-            justify.
+            assessment stays bounded by the connected signals and reported confidence.
           </p>
 
           <div className="hero-grid">
@@ -52,11 +51,10 @@ export default function HomePage() {
         </div>
 
         <aside className="lookup-card">
-          <h2>Phone lookup shell</h2>
+          <h2>Phone lookup</h2>
           <p>
-            This flow validates the future request boundary, response shape, and visible
-            reasoning surface without pretending that external intelligence providers are
-            already wired in.
+            This flow shows the request shape, response structure, and reasoning surface for
+            the source providers that Sentinel will connect.
           </p>
           <PhoneLookupForm />
         </aside>

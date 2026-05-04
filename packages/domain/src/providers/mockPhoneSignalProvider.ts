@@ -20,13 +20,13 @@ export class MockPhoneSignalProvider implements LookupProvider {
           status: "not-configured",
           observedAt: input.requestedAt,
           summary:
-            "MockPhoneSignalProvider is returning a placeholder observation because live integrations are not configured yet."
+            "MockPhoneSignalProvider is returning a baseline observation because live integrations are not configured yet."
         }
       ],
       evidence: [
         {
           id: "mock-provider-placeholder-evidence",
-          label: "Provider placeholder response",
+          label: "Provider baseline response",
           summary:
             "The provider layer is active, but no live phone intelligence integrations have been configured yet.",
           direction: "context-only",
@@ -34,7 +34,7 @@ export class MockPhoneSignalProvider implements LookupProvider {
           sourceId: this.sourceId,
           observedAt: input.requestedAt,
           redactionSafeSummary:
-            "The provider adapter returned a placeholder response because live integrations are not configured yet."
+            "The provider adapter returned a baseline response because live integrations are not configured yet."
         }
       ]
     };
