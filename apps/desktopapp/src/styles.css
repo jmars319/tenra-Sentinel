@@ -352,3 +352,75 @@ pre {
     text-align: left;
   }
 }
+
+/* tenra.dev desktop palette */
+:root {
+  color-scheme: dark;
+  color: #f2f2f5;
+  background: #0f1015;
+}
+
+body,
+#root,
+.desktop-shell,
+.assessment-panel {
+  background: #0f1015;
+  color: #f2f2f5;
+}
+
+.lookup-sidebar,
+.lookup-form,
+.history-list button,
+.panel-card,
+.score-card,
+.check-row,
+.evidence-list li,
+.source-list li,
+.empty-state,
+pre,
+input,
+textarea,
+select {
+  border-color: #30323b;
+  background: #15161d;
+  color: #f2f2f5;
+}
+
+.brand-block p,
+.notice,
+.eyebrow,
+.history-list small,
+.panel-header span,
+.evidence-list span,
+.source-list span,
+label {
+  color: #a0a0a0;
+}
+
+.lookup-form button,
+.action-row button {
+  border-color: #09a6d6;
+  background: #09a6d6;
+  color: #071015;
+}
+
+.action-row button:nth-child(2) {
+  border-color: #30323b;
+  background: #202129;
+  color: #f2f2f5;
+}
+
+.history-list button:hover,
+.history-list .is-active {
+  border-color: rgba(9, 166, 214, 0.58);
+  background: #1a1b22;
+}
+
+.lookup-sidebar {
+  border-right-color: #30323b;
+}
+
+.evidence-list li,
+.source-list li {
+  border-left-color: #09a6d6;
+}

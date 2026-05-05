@@ -10,6 +10,7 @@ import {
 import { redactPhoneNumber } from "@sentinel/privacy";
 import type { EvidenceDirection } from "@sentinel/shared-types";
 import { confidenceBandCopy, riskLevelToneMap } from "@sentinel/ui";
+import { readDesktopStore, writeDesktopStore } from "./lib/desktopStore";
 
 type ReviewFlagId =
   | "payment-pressure"
@@ -200,16 +201,7 @@ const buildResult = async (input: {
 };
 
 const loadSavedLookups = () => {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as SavedLookup[];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return [];
 };
 
 const formatTime = (iso: string) =>
@@ -260,10 +252,41 @@ export default function App() {
   const [activeId, setActiveId] = useState(savedLookups[0]?.id ?? "");
   const [notice, setNotice] = useState("Local lookup desk ready.");
   const [isRunning, setIsRunning] = useState(false);
+  const [isStoreReady, setIsStoreReady] = useState(false);
 
   useEffect(() => {
-    window.localStorage.setItem(storageKey, JSON.stringify(savedLookups));
-  }, [savedLookups]);
+    let cancelled = false;
+
+    readDesktopStore<SavedLookup[]>(storageKey)
+      .then((storedLookups) => {
+        if (cancelled) return;
+
+        if (Array.isArray(storedLookups) && storedLookups.length > 0) {
+          setSavedLookups(storedLookups);
+          setActiveId(storedLookups[0]?.id ?? "");
+          setNotice("Desktop store loaded.");
+        }
+
+        setIsStoreReady(true);
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setNotice(error instanceof Error ? error.message : "Desktop store unavailable.");
+        setIsStoreReady(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isStoreReady) return;
+
+    void writeDesktopStore(storageKey, savedLookups).catch((error: unknown) => {
+      setNotice(error instanceof Error ? error.message : "Desktop store write failed.");
+    });
+  }, [isStoreReady, savedLookups]);
 
   const activeLookup = savedLookups.find((lookup) => lookup.id === activeId) ?? savedLookups[0] ?? null;
   const activeTone = activeLookup ? riskLevelToneMap[activeLookup.result.assessment.level] : riskLevelToneMap.unknown;
