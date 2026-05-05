@@ -1,64 +1,500 @@
+import { useEffect, useMemo, useState } from "react";
+import type { PhoneLookupResult } from "@sentinel/api-contracts";
 import { sentinelAppName } from "@sentinel/config";
-import { riskLevelToneMap, sentinelTokens } from "@sentinel/ui";
+import {
+  createEvidenceWeightedAssessment,
+  orchestratePhoneLookup,
+  type EvidenceItem,
+  type SourceObservation,
+} from "@sentinel/domain";
+import { redactPhoneNumber } from "@sentinel/privacy";
+import type { EvidenceDirection } from "@sentinel/shared-types";
+import { confidenceBandCopy, riskLevelToneMap } from "@sentinel/ui";
 
-const sections = [
+type ReviewFlagId =
+  | "payment-pressure"
+  | "repeated-contact"
+  | "spoofing"
+  | "known-contact"
+  | "expected-call";
+
+type SavedLookup = {
+  id: string;
+  phoneNumber: string;
+  regionHint: string;
+  note: string;
+  selectedFlags: ReviewFlagId[];
+  result: PhoneLookupResult;
+};
+
+type ReviewFlag = {
+  id: ReviewFlagId;
+  label: string;
+  direction: EvidenceDirection;
+  confidence: number;
+  summary: string;
+};
+
+const storageKey = "tenra-sentinel-desktop-lookups:v1";
+
+const reviewFlags: ReviewFlag[] = [
   {
-    title: "Queue",
-    body: "Monitor incoming lookup jobs, retry behavior, and background processing health."
+    id: "payment-pressure",
+    label: "Asked for money, codes, credentials, or urgent action",
+    direction: "supports-risk",
+    confidence: 0.78,
+    summary: "Manual review noted pressure for payment, codes, credentials, or urgent action.",
   },
   {
-    title: "Assessments",
-    body: "Review structured tenra Sentinel outputs with evidence, source posture, and confidence context."
+    id: "repeated-contact",
+    label: "Repeated contact or unusual timing",
+    direction: "supports-risk",
+    confidence: 0.62,
+    summary: "Manual review noted repeated contact or unusual timing.",
   },
   {
-    title: "Sources",
-    body: "Track configured providers, ingest quality, and gaps in source coverage."
+    id: "spoofing",
+    label: "Spoofing, mismatch, or identity concern",
+    direction: "supports-risk",
+    confidence: 0.72,
+    summary: "Manual review noted possible spoofing, mismatch, or identity concern.",
   },
   {
-    title: "Settings",
-    body: "Manage environment posture, operator preferences, and future auth policies."
-  }
+    id: "known-contact",
+    label: "Known contact or verified business",
+    direction: "reduces-risk",
+    confidence: 0.7,
+    summary: "Manual review identified the number as a known contact or verified business.",
+  },
+  {
+    id: "expected-call",
+    label: "Expected call or confirmed context",
+    direction: "reduces-risk",
+    confidence: 0.56,
+    summary: "Manual review found expected-call context or outside confirmation.",
+  },
 ];
 
+const createId = () =>
+  typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `sentinel-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+const nowIso = () => new Date().toISOString();
+
+const normalizePhoneNumber = (input: string): string => {
+  const trimmed = input.trim();
+  const digitsOnly = trimmed.replace(/[^\d+]/g, "");
+
+  if (digitsOnly.startsWith("+")) return digitsOnly;
+  return `+${digitsOnly}`;
+};
+
+const buildManualEvidence = (input: {
+  flags: ReviewFlagId[];
+  note: string;
+  observedAt: string;
+}): EvidenceItem[] => {
+  const selected = reviewFlags.filter((flag) => input.flags.includes(flag.id));
+  const evidence = selected.map((flag): EvidenceItem => ({
+    id: `manual-${flag.id}`,
+    label: flag.label,
+    summary: flag.summary,
+    direction: flag.direction,
+    confidence: flag.confidence,
+    sourceId: "internal-review",
+    observedAt: input.observedAt,
+    redactionSafeSummary: flag.summary,
+  }));
+
+  if (input.note.trim()) {
+    evidence.push({
+      id: "manual-review-note",
+      label: "Operator note",
+      summary: input.note.trim(),
+      direction: "context-only",
+      confidence: 0.35,
+      sourceId: "manual-input",
+      observedAt: input.observedAt,
+      redactionSafeSummary: input.note.trim(),
+    });
+  }
+
+  return evidence;
+};
+
+const buildManualSourceObservation = (observedAt: string, evidence: EvidenceItem[]): SourceObservation => ({
+  sourceId: "internal-review",
+  status: evidence.some((item) => item.direction !== "context-only") ? "complete" : "available",
+  observedAt,
+  summary:
+    evidence.length > 0
+      ? `${evidence.length} manual review signal(s) captured.`
+      : "Manual review is available, but no review signal was selected.",
+});
+
+const buildResult = async (input: {
+  phoneNumber: string;
+  regionHint: string;
+  note: string;
+  flags: ReviewFlagId[];
+}): Promise<PhoneLookupResult> => {
+  const observedAt = nowIso();
+  const normalizedPhoneNumber = normalizePhoneNumber(input.phoneNumber);
+  const redacted = redactPhoneNumber(normalizedPhoneNumber);
+  const orchestration = await orchestratePhoneLookup({
+    rawInput: input.phoneNumber,
+    normalizedPhoneNumber,
+    regionHint: input.regionHint,
+    includeEvidence: true,
+    requestedAt: observedAt,
+  });
+  const manualEvidence = buildManualEvidence({
+    flags: input.flags,
+    note: input.note,
+    observedAt,
+  });
+  const evidence = [...manualEvidence, ...orchestration.evidence];
+  const sourceSummaries = [
+    buildManualSourceObservation(observedAt, manualEvidence),
+    ...orchestration.sourceSummaries,
+  ];
+  const hasManualRiskSignal = manualEvidence.some((item) => item.direction !== "context-only");
+  const assessment = hasManualRiskSignal
+    ? createEvidenceWeightedAssessment({ evidence, sources: sourceSummaries })
+    : orchestration.assessment;
+
+  return {
+    job: {
+      id: `lookup-${Date.now()}`,
+      targetKind: "phone-number",
+      submittedAt: observedAt,
+      status: assessment.posture === "insufficient-signal" ? "insufficient-signal" : "completed",
+      correlationKey: normalizedPhoneNumber,
+    },
+    query: {
+      rawInput: input.phoneNumber,
+      normalizedPhoneNumber,
+      maskedPhoneNumber: redacted.redactedValue,
+      ...(input.regionHint ? { regionHint: input.regionHint } : {}),
+    },
+    assessment: {
+      ...assessment,
+      evidence,
+      sources: sourceSummaries,
+    },
+    evidence,
+    sourceSummaries,
+    notices: [
+      {
+        code: "provider-not-configured",
+        summary: "Live phone intelligence providers are not configured; the desktop assessment is based on local review signals and placeholder provider posture.",
+      },
+      {
+        code: "redacted-output",
+        summary: `The lookup target is displayed in redacted form (${redacted.redactedValue}).`,
+      },
+    ],
+    generatedAt: observedAt,
+  };
+};
+
+const loadSavedLookups = () => {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as SavedLookup[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const formatTime = (iso: string) =>
+  new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(iso));
+
+const toMarkdown = (saved: SavedLookup) => {
+  const { result } = saved;
+
+  return [
+    `# Sentinel Lookup ${result.query.maskedPhoneNumber}`,
+    "",
+    `Generated: ${result.generatedAt}`,
+    `Region: ${result.query.regionHint ?? "n/a"}`,
+    `Risk: ${riskLevelToneMap[result.assessment.level].label}`,
+    `Posture: ${result.assessment.posture}`,
+    `Confidence: ${result.assessment.confidence.score.toFixed(2)} (${result.assessment.confidence.band.label})`,
+    "",
+    "## Reasoning",
+    "",
+    result.assessment.reasoning.narrative,
+    "",
+    "## Factors",
+    "",
+    ...result.assessment.reasoning.factors.map((factor) => `- ${factor}`),
+    "",
+    "## Evidence",
+    "",
+    ...result.evidence.map((item) => `- ${item.label}: ${item.redactionSafeSummary}`),
+    "",
+    "## Sources",
+    "",
+    ...result.sourceSummaries.map((source) => `- ${source.sourceId}: ${source.status} - ${source.summary}`),
+    saved.note.trim() ? ["", "## Operator Note", "", saved.note.trim()].join("\n") : "",
+  ].join("\n");
+};
+
 export default function App() {
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [regionHint, setRegionHint] = useState("US");
+  const [note, setNote] = useState("");
+  const [selectedFlags, setSelectedFlags] = useState<ReviewFlagId[]>([]);
+  const [savedLookups, setSavedLookups] = useState<SavedLookup[]>(loadSavedLookups);
+  const [activeId, setActiveId] = useState(savedLookups[0]?.id ?? "");
+  const [notice, setNotice] = useState("Local lookup desk ready.");
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    window.localStorage.setItem(storageKey, JSON.stringify(savedLookups));
+  }, [savedLookups]);
+
+  const activeLookup = savedLookups.find((lookup) => lookup.id === activeId) ?? savedLookups[0] ?? null;
+  const activeTone = activeLookup ? riskLevelToneMap[activeLookup.result.assessment.level] : riskLevelToneMap.unknown;
+  const markdown = useMemo(() => (activeLookup ? toMarkdown(activeLookup) : ""), [activeLookup]);
+
+  const toggleFlag = (flagId: ReviewFlagId) => {
+    setSelectedFlags((current) =>
+      current.includes(flagId) ? current.filter((id) => id !== flagId) : [...current, flagId],
+    );
+  };
+
+  const runLookup = async () => {
+    if (phoneNumber.trim().replace(/\D/g, "").length < 7) {
+      setNotice("Enter at least 7 digits before running a lookup.");
+      return;
+    }
+
+    setIsRunning(true);
+    setNotice("Preparing local assessment...");
+
+    try {
+      const result = await buildResult({
+        phoneNumber,
+        regionHint,
+        note,
+        flags: selectedFlags,
+      });
+      const saved: SavedLookup = {
+        id: createId(),
+        phoneNumber,
+        regionHint,
+        note,
+        selectedFlags,
+        result,
+      };
+      setSavedLookups((current) => [saved, ...current]);
+      setActiveId(saved.id);
+      setNotice("Assessment saved.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Lookup failed.");
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const copyMarkdown = async () => {
+    if (!activeLookup) return;
+    try {
+      await navigator.clipboard.writeText(markdown);
+      setNotice("Markdown copied.");
+    } catch {
+      setNotice("Clipboard copy failed. Export still works.");
+    }
+  };
+
+  const exportMarkdown = () => {
+    if (!activeLookup) return;
+    const slug = `sentinel-${activeLookup.result.query.maskedPhoneNumber.replace(/[^a-zA-Z0-9]+/g, "-")}`;
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${slug}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setNotice("Markdown export created.");
+  };
+
   return (
     <main className="desktop-shell">
-      <header className="desktop-header">
-        <div>
-          <span className="desktop-eyebrow">Desktop operations</span>
-          <h1>{sentinelAppName} Desktop</h1>
-          <p>
-            Queue visibility, assessment review, source status, and operational settings.
+      <aside className="lookup-sidebar">
+        <header className="brand-block">
+          <span>Desktop operations</span>
+          <h1>{sentinelAppName}</h1>
+          <p>Local lookup review, evidence weighting, and source posture.</p>
+        </header>
+
+        <section className="lookup-form" aria-label="Phone lookup">
+          <label>
+            Phone number
+            <input
+              autoComplete="tel"
+              inputMode="tel"
+              placeholder="+1 555 012 3456"
+              value={phoneNumber}
+              onChange={(event) => setPhoneNumber(event.target.value)}
+            />
+          </label>
+
+          <label>
+            Region
+            <input
+              autoCapitalize="characters"
+              maxLength={8}
+              value={regionHint}
+              onChange={(event) => setRegionHint(event.target.value.toUpperCase())}
+            />
+          </label>
+
+          <fieldset>
+            <legend>Review signals</legend>
+            {reviewFlags.map((flag) => (
+              <label className="check-row" key={flag.id}>
+                <input
+                  checked={selectedFlags.includes(flag.id)}
+                  type="checkbox"
+                  onChange={() => toggleFlag(flag.id)}
+                />
+                <span>{flag.label}</span>
+              </label>
+            ))}
+          </fieldset>
+
+          <label>
+            Operator note
+            <textarea
+              placeholder="Add call details, message content, who reported it, or outside confirmation."
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+            />
+          </label>
+
+          <button disabled={isRunning} type="button" onClick={runLookup}>
+            {isRunning ? "Running..." : "Run Lookup"}
+          </button>
+          <p className="notice" role="status">
+            {notice}
           </p>
-        </div>
+        </section>
 
-        <div
-          className="desktop-status"
-          style={{ borderColor: riskLevelToneMap.unknown.accent }}
-        >
-          <strong>Current posture</strong>
-          <p>Desktop is prepared for queue review, source checks, and assessment triage.</p>
-        </div>
-      </header>
+        <nav className="history-list" aria-label="Lookup history">
+          {savedLookups.map((lookup) => (
+            <button
+              className={lookup.id === activeLookup?.id ? "history-item history-item-active" : "history-item"}
+              key={lookup.id}
+              onClick={() => setActiveId(lookup.id)}
+              type="button"
+            >
+              <span>{lookup.result.query.maskedPhoneNumber}</span>
+              <small>
+                {riskLevelToneMap[lookup.result.assessment.level].label} / {formatTime(lookup.result.generatedAt)}
+              </small>
+            </button>
+          ))}
+        </nav>
+      </aside>
 
-      <section className="desktop-grid">
-        {sections.map((section) => (
-          <article className="desktop-card" key={section.title}>
-            <strong>{section.title}</strong>
-            <p>{section.body}</p>
-          </article>
-        ))}
-      </section>
+      <section className="assessment-panel" aria-label="Assessment">
+        {activeLookup ? (
+          <>
+            <header className="assessment-header" style={{ borderColor: activeTone.accent }}>
+              <div>
+                <span className="eyebrow">Assessment</span>
+                <h2>{activeTone.label}</h2>
+                <p>{activeLookup.result.assessment.reasoning.headline}</p>
+              </div>
+              <div className="score-card">
+                <strong>{activeLookup.result.assessment.confidence.score.toFixed(2)}</strong>
+                <span>{confidenceBandCopy[activeLookup.result.assessment.confidence.band.label]}</span>
+              </div>
+            </header>
 
-      <section className="desktop-footer">
-        <div className="desktop-band">
-          <span
-            className="desktop-dot"
-            style={{ background: sentinelTokens.color.accent }}
-          />
-          Shared packages hold domain logic, validation, contracts, and privacy helpers so
-          this desktop channel can remain operationally focused.
-        </div>
+            <div className="panel-grid">
+              <section className="panel-card">
+                <header className="panel-header">
+                  <span>Reasoning</span>
+                  <strong>{activeLookup.result.assessment.posture}</strong>
+                </header>
+                <p>{activeLookup.result.assessment.reasoning.narrative}</p>
+                <ul>
+                  {activeLookup.result.assessment.reasoning.factors.map((factor) => (
+                    <li key={factor}>{factor}</li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="panel-card">
+                <header className="panel-header">
+                  <span>Evidence</span>
+                  <strong>{activeLookup.result.evidence.length}</strong>
+                </header>
+                <ul className="evidence-list">
+                  {activeLookup.result.evidence.map((item) => (
+                    <li key={item.id}>
+                      <strong>{item.label}</strong>
+                      <span>{item.direction} / {item.confidence.toFixed(2)}</span>
+                      <p>{item.redactionSafeSummary}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="panel-card">
+                <header className="panel-header">
+                  <span>Sources</span>
+                  <strong>{activeLookup.result.sourceSummaries.length}</strong>
+                </header>
+                <ul className="source-list">
+                  {activeLookup.result.sourceSummaries.map((source) => (
+                    <li key={`${source.sourceId}-${source.observedAt}`}>
+                      <strong>{source.sourceId}</strong>
+                      <span>{source.status}</span>
+                      <p>{source.summary}</p>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+
+              <section className="panel-card">
+                <header className="panel-header">
+                  <span>Export</span>
+                  <strong>{activeLookup.result.query.maskedPhoneNumber}</strong>
+                </header>
+                <div className="action-row">
+                  <button type="button" onClick={copyMarkdown}>
+                    Copy Markdown
+                  </button>
+                  <button type="button" onClick={exportMarkdown}>
+                    Export
+                  </button>
+                </div>
+                <pre>{markdown}</pre>
+              </section>
+            </div>
+          </>
+        ) : (
+          <section className="empty-state">
+            <span className="eyebrow">No assessment selected</span>
+            <h2>Run a lookup to create the first local assessment.</h2>
+          </section>
+        )}
       </section>
     </main>
   );

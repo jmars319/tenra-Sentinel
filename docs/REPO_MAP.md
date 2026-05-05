@@ -2,20 +2,22 @@
 
 ## Apps
 
-### `apps/webapp`
-
-Primary product surface. Hosts the initial phone-number lookup experience, the placeholder
-API route, and the first reasoning-oriented UI for structured assessments.
-
 ### `apps/desktopapp`
 
-Thin Tauri desktop shell intended for future operator workflows such as queue management,
-assessment review, source administration, and environment controls.
+Primary Tauri operator surface. It now supports local phone lookup review, manual review
+signals, evidence weighting, saved lookup history, source posture review, and Markdown
+export. Source administration, queue visibility, and environment controls can build from
+this surface.
+
+### `apps/webapp`
+
+Secondary hosted/API review surface. Hosts the initial phone-number lookup experience,
+the placeholder API route, and a reasoning-oriented UI for structured assessments.
 
 ### `apps/mobileapp`
 
-Thin Expo mobile scaffold for future mobile intake and lightweight review workflows. Kept
-minimal until a concrete mobile use case is defined.
+Third-surface Expo scaffold for future mobile intake and lightweight review workflows.
+Kept minimal until desktop and web workflows justify a concrete mobile use case.
 
 ## Packages
 

@@ -29,9 +29,21 @@ importers:
 
   apps/desktopapp:
     dependencies:
+      '@sentinel/api-contracts':
+        specifier: workspace:*
+        version: link:../../packages/api-contracts
       '@sentinel/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@sentinel/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@sentinel/privacy':
+        specifier: workspace:*
+        version: link:../../packages/privacy
+      '@sentinel/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       '@sentinel/ui':
         specifier: workspace:*
         version: link:../../packages/ui

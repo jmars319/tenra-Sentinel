@@ -7,18 +7,17 @@ It is not a blocker, not a search engine, and not an AI oracle. The intended rol
 reasoning layer: gather signals, preserve evidence and provenance, weigh uncertainty, and
 return structured assessments that are understandable enough to inspect.
 
-The first concrete use case in this scaffold is suspicious phone-number lookup. The current
-repo state is a working monorepo foundation with thin app shells, shared domain packages,
-and a placeholder lookup boundary that compiles without pretending live intelligence
-providers already exist.
+The first concrete use case is suspicious phone-number lookup. The product direction is
+desktop-first, with web second for hosted/API review surfaces and mobile third for later
+lightweight review.
 
 ## Repo structure
 
 ```text
 apps/
-  webapp/       Primary early product surface
-  desktopapp/   Thin Tauri operator shell
-  mobileapp/    Thin Expo mobile scaffold
+  desktopapp/   Primary Tauri operator surface
+  webapp/       Secondary hosted/API review surface
+  mobileapp/    Third-surface Expo scaffold for later lightweight review
 
 packages/
   shared-types/ Cross-cutting primitive types
@@ -49,11 +48,11 @@ pnpm run verify:all
 pnpm run doctor
 ```
 
-## Current scaffold state
+## Current product state
 
+- The desktop app is the primary surface and now runs a local phone lookup/review desk with manual review signals, evidence weighting, saved history, and Markdown export.
 - The web app boots with a tenra Sentinel-specific homepage and a phone lookup form shell.
 - The web app exposes a placeholder `/api/lookup/phone` route using shared contracts and validation.
-- The desktop app is a valid React + Vite + Tauri shell with operator-oriented placeholder sections.
 - The mobile app is a valid Expo shell kept intentionally minimal.
 - Shared packages define the initial tenra Sentinel vocabulary so product logic can expand without
   bloating the app layers.

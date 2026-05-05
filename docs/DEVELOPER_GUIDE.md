@@ -22,8 +22,9 @@ pnpm run dev:mobile
 pnpm run dev:both
 ```
 
-`dev:both` starts the web app and the desktop shell together. The web app is the primary
-early product surface.
+`dev:both` starts the desktop app and the web app together. Desktop is the primary
+product surface; web is the secondary hosted/API surface; mobile remains third for later
+lightweight review.
 
 ## Verifying the workspace
 
