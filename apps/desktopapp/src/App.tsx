@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
+  buildSentinelGuardrailReviewRequest,
   buildSentinelRiskBrief,
   type PhoneLookupResult,
   type SentinelRiskBrief,
@@ -480,6 +481,30 @@ export default function App() {
     }
   };
 
+  const copyGuardrailReview = async () => {
+    const brief = activeRiskBrief;
+    if (!brief) return;
+
+    try {
+      await navigator.clipboard.writeText(
+        JSON.stringify(buildSentinelGuardrailReviewRequest({ brief }), null, 2),
+      );
+      setNotice("Guardrail review packet copied.");
+    } catch {
+      setNotice("Clipboard copy failed. Risk JSON export still works.");
+    }
+  };
+
+  const exportGuardrailReview = () => {
+    const brief = activeRiskBrief;
+    if (!brief) return;
+    downloadJsonFile(
+      buildSentinelGuardrailReviewRequest({ brief }),
+      `tenra-sentinel-guardrail-review-${todayForFilename()}.json`,
+    );
+    setNotice("Guardrail review export created.");
+  };
+
   const exportRiskBrief = () => {
     if (!activeLookup) return;
     downloadJsonFile(
@@ -755,6 +780,12 @@ export default function App() {
                   </button>
                   <button type="button" onClick={() => void copyRiskBrief("guardrail")}>
                     Send Guardrail
+                  </button>
+                  <button type="button" onClick={() => void copyGuardrailReview()}>
+                    Guardrail Review
+                  </button>
+                  <button type="button" onClick={exportGuardrailReview}>
+                    Review JSON
                   </button>
                   <button type="button" onClick={exportRiskBrief}>
                     Risk JSON

@@ -52,6 +52,22 @@ export interface SentinelRiskBrief {
   };
 }
 
+export interface SentinelGuardrailReviewRequest {
+  schema: "tenra-guardrail.external-action-review.v1";
+  exportedAt: IsoTimestamp;
+  sourceApp: "sentinel";
+  actionKind: "moderation-action";
+  actorLabel: string;
+  targetLabel: string;
+  summary: string;
+  evidence: Array<{
+    label: string;
+    value: string;
+  }>;
+  recommendedDecision: "allow" | "review" | "deny";
+  traceId: string;
+}
+
 export function buildSentinelRiskBrief(input: {
   lookup: PhoneLookupResult;
   exportedAt?: IsoTimestamp | undefined;
@@ -68,5 +84,37 @@ export function buildSentinelRiskBrief(input: {
       recommendedConsumers: input.recommendedConsumers ?? ["derive", "guardrail"],
       actionPosture: input.lookup.assessment.posture
     }
+  };
+}
+
+export function buildSentinelGuardrailReviewRequest(input: {
+  brief: SentinelRiskBrief;
+  exportedAt?: IsoTimestamp | undefined;
+}): SentinelGuardrailReviewRequest {
+  const { brief } = input;
+  const decision =
+    brief.handoff.actionPosture === "avoid" || brief.handoff.actionPosture === "limit"
+      ? "deny"
+      : "review";
+
+  return {
+    schema: "tenra-guardrail.external-action-review.v1",
+    exportedAt: input.exportedAt ?? new Date().toISOString(),
+    sourceApp: "sentinel",
+    actionKind: "moderation-action",
+    actorLabel: "Sentinel risk workbench",
+    targetLabel: brief.lookup.query.maskedPhoneNumber,
+    summary: brief.lookup.assessment.reasoning.headline,
+    evidence: [
+      { label: "Risk level", value: brief.lookup.assessment.level },
+      { label: "Action posture", value: brief.handoff.actionPosture },
+      { label: "Confidence", value: brief.lookup.assessment.confidence.band.label },
+      ...brief.lookup.evidence.slice(0, 6).map((item) => ({
+        label: item.label,
+        value: item.redactionSafeSummary
+      }))
+    ],
+    recommendedDecision: decision,
+    traceId: `sentinel-${brief.lookup.job.id}-guardrail`
   };
 }
