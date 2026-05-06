@@ -1,5 +1,5 @@
 import type { LookupTargetKind } from "@sentinel/shared-types";
-import { MockPhoneSignalProvider } from "./mockPhoneSignalProvider";
+import { LocalPhoneSignalProvider } from "./mockPhoneSignalProvider";
 import type { LookupProvider } from "./types";
 
 export class LookupProviderRegistry {
@@ -26,6 +26,6 @@ export class LookupProviderRegistry {
 }
 
 export const createDefaultLookupProviderRegistry = (): LookupProviderRegistry =>
-  new LookupProviderRegistry().register(new MockPhoneSignalProvider());
+  new LookupProviderRegistry().register(new LocalPhoneSignalProvider());
 
 export const sentinelProviderRegistry = createDefaultLookupProviderRegistry();

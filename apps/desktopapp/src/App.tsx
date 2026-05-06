@@ -164,6 +164,27 @@ const buildResult = async (input: {
   const assessment = hasManualRiskSignal
     ? createEvidenceWeightedAssessment({ evidence, sources: sourceSummaries })
     : orchestration.assessment;
+  const notices: PhoneLookupResult["notices"] = [];
+
+  if (assessment.posture === "insufficient-signal") {
+    notices.push({
+      code: "placeholder-result",
+      summary:
+        "Local pattern review did not produce enough evidence for a risk conclusion. Add review signals or corroborating context before acting on it.",
+    });
+  }
+
+  if (orchestration.providerResults.some((result) => result.providerStatus === "placeholder")) {
+    notices.push({
+      code: "provider-not-configured",
+      summary: "Live phone intelligence providers are not configured.",
+    });
+  }
+
+  notices.push({
+    code: "redacted-output",
+    summary: `The lookup target is displayed in redacted form (${redacted.redactedValue}).`,
+  });
 
   return {
     job: {
@@ -186,16 +207,7 @@ const buildResult = async (input: {
     },
     evidence,
     sourceSummaries,
-    notices: [
-      {
-        code: "provider-not-configured",
-        summary: "Live phone intelligence providers are not configured; the desktop assessment is based on local review signals and placeholder provider posture.",
-      },
-      {
-        code: "redacted-output",
-        summary: `The lookup target is displayed in redacted form (${redacted.redactedValue}).`,
-      },
-    ],
+    notices,
     generatedAt: observedAt,
   };
 };

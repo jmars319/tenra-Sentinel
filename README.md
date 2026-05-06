@@ -50,9 +50,9 @@ pnpm run doctor
 
 ## Current product state
 
-- The desktop app is the primary surface and now runs a local phone lookup/review desk with manual review signals, evidence weighting, saved history, and Markdown export.
+- The desktop app is the primary surface and now runs a local phone lookup/review desk with offline number-pattern review, manual review signals, evidence weighting, saved history, and Markdown export.
 - The web app boots with a tenra Sentinel-specific homepage and a phone lookup form shell.
-- The web app exposes a placeholder `/api/lookup/phone` route using shared contracts and validation.
+- The web app exposes `/api/lookup/phone` using shared contracts, validation, and the same local pattern-review provider.
 - The mobile app is a valid Expo shell kept intentionally minimal.
 - Shared packages define the initial tenra Sentinel vocabulary so product logic can expand without
   bloating the app layers.

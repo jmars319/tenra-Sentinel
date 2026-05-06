@@ -9,6 +9,7 @@ export type EvidenceDirection = "supports-risk" | "reduces-risk" | "context-only
 export type SourceId =
   | "manual-input"
   | "placeholder"
+  | "local-pattern-review"
   | "community-report"
   | "reputation-feed"
   | "telecom-observation"

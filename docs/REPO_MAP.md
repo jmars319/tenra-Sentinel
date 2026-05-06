@@ -4,15 +4,16 @@
 
 ### `apps/desktopapp`
 
-Primary Tauri operator surface. It now supports local phone lookup review, manual review
-signals, evidence weighting, saved lookup history, source posture review, and Markdown
-export. Source administration, queue visibility, and environment controls can build from
-this surface.
+Primary Tauri operator surface. It now supports offline phone number-pattern review,
+manual review signals, evidence weighting, saved lookup history, source posture review,
+and Markdown export. Source administration, queue visibility, and environment controls
+can build from this surface.
 
 ### `apps/webapp`
 
 Secondary hosted/API review surface. Hosts the initial phone-number lookup experience,
-the placeholder API route, and a reasoning-oriented UI for structured assessments.
+the local pattern-review API route, and a reasoning-oriented UI for structured
+assessments.
 
 ### `apps/mobileapp`
 

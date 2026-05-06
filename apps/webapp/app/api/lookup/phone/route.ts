@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     notices.push({
       code: "placeholder-result",
       summary:
-        "tenra Sentinel completed the lookup orchestration flow, but no meaningful provider evidence is available yet."
+        "Local pattern review did not produce enough evidence for a risk conclusion."
     });
   }
 
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     notices.push({
       code: "provider-not-configured",
       summary:
-        "The provider adapter layer is active, but live phone intelligence integrations are not configured yet."
+        "Live phone intelligence providers are not configured."
     });
   }
 

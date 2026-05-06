@@ -13,6 +13,7 @@ export const isoTimestampSchema = z.string().datetime({ offset: true });
 export const sourceIdSchema = z.enum([
   "manual-input",
   "placeholder",
+  "local-pattern-review",
   "community-report",
   "reputation-feed",
   "telecom-observation",
