@@ -21,6 +21,7 @@
     "verify:web": "./scripts/verify-web.sh",
     "verify:desktop": "./scripts/verify-desktop.sh",
     "verify:mobile": "./scripts/verify-mobile.sh",
+    "verify:handoffs": "node ./scripts/validate-handoffs.mjs",
     "verify:all": "./scripts/verify-all.sh",
     "doctor": "./scripts/doctor.sh",
     "lint": "pnpm exec eslint .",

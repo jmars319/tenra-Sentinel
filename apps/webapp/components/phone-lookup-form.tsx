@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import type { PhoneLookupResult } from "@sentinel/api-contracts";
+import { buildSentinelRiskBrief, type PhoneLookupResult } from "@sentinel/api-contracts";
 import { riskLevelToneMap } from "@sentinel/ui";
 
 interface ApiErrorPayload {
@@ -50,6 +50,7 @@ export function PhoneLookupForm() {
   };
 
   const accent = result ? riskLevelToneMap[result.assessment.level].accent : undefined;
+  const riskBrief = result ? buildSentinelRiskBrief({ lookup: result }) : null;
 
   return (
     <>
@@ -146,6 +147,13 @@ export function PhoneLookupForm() {
               </ul>
             </div>
           </div>
+          {riskBrief ? (
+            <div className="result-block">
+              <strong>Handoff</strong>
+              <p>{riskBrief.schema}</p>
+              <p>{riskBrief.handoff.recommendedConsumers.join(", ")}</p>
+            </div>
+          ) : null}
         </section>
       ) : null}
     </>

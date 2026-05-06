@@ -51,3 +51,22 @@ export interface SentinelRiskBrief {
     actionPosture: "observe" | "review" | "limit" | "avoid" | "insufficient-signal";
   };
 }
+
+export function buildSentinelRiskBrief(input: {
+  lookup: PhoneLookupResult;
+  exportedAt?: IsoTimestamp | undefined;
+  recommendedConsumers?: SentinelRiskBriefConsumer[] | undefined;
+}): SentinelRiskBrief {
+  return {
+    schema: "tenra-sentinel.risk-brief.v1",
+    exportedAt: input.exportedAt ?? input.lookup.generatedAt,
+    sourceApp: "sentinel",
+    lookup: input.lookup,
+    handoff: {
+      questionForDerive:
+        "Given the Sentinel evidence and source posture, what can be concluded, what remains uncertain, and what action should a human reviewer take next?",
+      recommendedConsumers: input.recommendedConsumers ?? ["derive", "guardrail"],
+      actionPosture: input.lookup.assessment.posture
+    }
+  };
+}
