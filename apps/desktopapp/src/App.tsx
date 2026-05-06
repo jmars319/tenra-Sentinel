@@ -42,6 +42,16 @@ type SentinelHistoryExport = {
   schema: "tenra-sentinel-desktop-history:v1";
 };
 
+type DeriveReasoningBriefContext = {
+  schema: "tenra-derive.reasoning-brief.v1";
+  exportedAt: string;
+  question: string;
+  answerText: string;
+  confidence: string;
+  summary: string;
+  openQuestions: string[];
+};
+
 type ReviewFlag = {
   id: ReviewFlagId;
   label: string;
@@ -273,6 +283,35 @@ const parseHistoryImport = (input: unknown): SavedLookup[] => {
   return lookups;
 };
 
+const parseDeriveReasoningBriefContext = (input: unknown): DeriveReasoningBriefContext => {
+  const candidate = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
+  const question = candidate.question && typeof candidate.question === "object" ? candidate.question as Record<string, unknown> : {};
+  const answer = candidate.answer && typeof candidate.answer === "object" ? candidate.answer as Record<string, unknown> : {};
+  const handoff = candidate.handoff && typeof candidate.handoff === "object" ? candidate.handoff as Record<string, unknown> : {};
+  const openQuestions = Array.isArray(handoff.openQuestions) ? handoff.openQuestions.filter((item): item is string => typeof item === "string") : [];
+
+  if (
+    candidate.schema !== "tenra-derive.reasoning-brief.v1" ||
+    typeof candidate.exportedAt !== "string" ||
+    typeof question.text !== "string" ||
+    typeof answer.answerText !== "string" ||
+    typeof answer.confidence !== "string" ||
+    typeof handoff.summary !== "string"
+  ) {
+    throw new Error("Derive reasoning brief JSON is missing required Sentinel review context fields.");
+  }
+
+  return {
+    schema: "tenra-derive.reasoning-brief.v1",
+    exportedAt: candidate.exportedAt,
+    question: question.text,
+    answerText: answer.answerText,
+    confidence: answer.confidence,
+    summary: handoff.summary,
+    openQuestions,
+  };
+};
+
 const formatTime = (iso: string) =>
   new Intl.DateTimeFormat(undefined, {
     month: "short",
@@ -352,6 +391,7 @@ export default function App() {
   const [activeId, setActiveId] = useState(savedLookups[0]?.id ?? "");
   const [handoffJson, setHandoffJson] = useState("");
   const [importedRiskBrief, setImportedRiskBrief] = useState<SentinelRiskBrief | null>(null);
+  const [deriveContext, setDeriveContext] = useState<DeriveReasoningBriefContext | null>(null);
   const [notice, setNotice] = useState("Local lookup desk ready.");
   const [isRunning, setIsRunning] = useState(false);
   const [isStoreReady, setIsStoreReady] = useState(false);
@@ -516,12 +556,21 @@ export default function App() {
 
   const importRiskBrief = () => {
     if (!handoffJson.trim()) {
-      setNotice("Paste a Sentinel risk brief before importing.");
+      setNotice("Paste a Sentinel risk brief or Derive reasoning brief before importing.");
       return;
     }
 
     try {
-      const brief = parseSentinelRiskBrief(JSON.parse(handoffJson));
+      const parsed = JSON.parse(handoffJson) as { schema?: string };
+      if (parsed.schema === "tenra-derive.reasoning-brief.v1") {
+        const context = parseDeriveReasoningBriefContext(parsed);
+        setDeriveContext(context);
+        setHandoffJson("");
+        setNotice("Imported Derive reasoning brief as Sentinel review context.");
+        return;
+      }
+
+      const brief = parseSentinelRiskBrief(parsed);
       const saved: SavedLookup = {
         id: createId(),
         phoneNumber: brief.lookup.query.rawInput,
@@ -667,16 +716,21 @@ export default function App() {
 
         <section className="lookup-form" aria-label="Risk brief handoff inbox">
           <label>
-            Risk brief JSON
+            Risk or Derive brief JSON
             <textarea
-              placeholder='{"schema":"tenra-sentinel.risk-brief.v1",...}'
+              placeholder='{"schema":"tenra-sentinel.risk-brief.v1",...} or {"schema":"tenra-derive.reasoning-brief.v1",...}'
               value={handoffJson}
               onChange={(event) => setHandoffJson(event.target.value)}
             />
           </label>
           <button type="button" onClick={importRiskBrief}>
-            Import Risk Brief
+            Import Brief
           </button>
+          {deriveContext ? (
+            <div className="notice">
+              Derive context: {deriveContext.confidence} confidence · {deriveContext.openQuestions.length} open question(s)
+            </div>
+          ) : null}
           {importedRiskBrief ? (
             <div className="history-actions">
               {importedRiskBrief.handoff.recommendedConsumers.map((consumer) => (
@@ -765,6 +819,27 @@ export default function App() {
                   ))}
                 </ul>
               </section>
+
+              {deriveContext ? (
+                <section className="panel-card">
+                    <header className="panel-header">
+                      <span>Derive Context</span>
+                      <strong>{deriveContext.confidence}</strong>
+                    </header>
+                    <p>{deriveContext.summary}</p>
+                    <p>{deriveContext.answerText}</p>
+                    {deriveContext.openQuestions.length ? (
+                      <ul className="evidence-list">
+                        {deriveContext.openQuestions.map((question) => (
+                          <li key={question}>
+                            <strong>Open question</strong>
+                            <p>{question}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                </section>
+              ) : null}
 
               <section className="panel-card">
                 <header className="panel-header">
