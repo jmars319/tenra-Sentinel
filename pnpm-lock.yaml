@@ -47,6 +47,9 @@ importers:
       '@sentinel/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@sentinel/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       '@tauri-apps/api':
         specifier: ^2.3.0
         version: 2.10.1

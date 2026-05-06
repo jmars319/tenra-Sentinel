@@ -17,6 +17,7 @@
     "@sentinel/domain": "workspace:*",
     "@sentinel/privacy": "workspace:*",
     "@sentinel/shared-types": "workspace:*",
+    "@sentinel/validation": "workspace:*",
     "@sentinel/ui": "workspace:*",
     "@tauri-apps/api": "^2.3.0",
     "react": "^19.0.0",

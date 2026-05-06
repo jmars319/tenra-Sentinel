@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
-import type { PhoneLookupResult } from "@sentinel/api-contracts";
+import {
+  buildSentinelRiskBrief,
+  type PhoneLookupResult,
+  type SentinelRiskBrief,
+  type SentinelRiskBriefConsumer,
+} from "@sentinel/api-contracts";
 import { sentinelAppName } from "@sentinel/config";
 import {
   createEvidenceWeightedAssessment,
@@ -11,6 +16,7 @@ import {
 import { redactPhoneNumber } from "@sentinel/privacy";
 import type { EvidenceDirection } from "@sentinel/shared-types";
 import { confidenceBandCopy, riskLevelToneMap } from "@sentinel/ui";
+import { parseSentinelRiskBrief } from "@sentinel/validation";
 import { readDesktopStore, readLegacyLocalStorage, writeDesktopStore } from "./lib/desktopStore";
 
 type ReviewFlagId =
@@ -91,6 +97,19 @@ const createId = () =>
 const nowIso = () => new Date().toISOString();
 
 const todayForFilename = () => new Date().toISOString().slice(0, 10);
+
+const downloadJsonFile = (value: unknown, filename: string) => {
+  const blob = new Blob([JSON.stringify(value, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 const normalizePhoneNumber = (input: string): string => {
   const trimmed = input.trim();
@@ -330,6 +349,8 @@ export default function App() {
   const [selectedFlags, setSelectedFlags] = useState<ReviewFlagId[]>([]);
   const [savedLookups, setSavedLookups] = useState<SavedLookup[]>(loadSavedLookups);
   const [activeId, setActiveId] = useState(savedLookups[0]?.id ?? "");
+  const [handoffJson, setHandoffJson] = useState("");
+  const [importedRiskBrief, setImportedRiskBrief] = useState<SentinelRiskBrief | null>(null);
   const [notice, setNotice] = useState("Local lookup desk ready.");
   const [isRunning, setIsRunning] = useState(false);
   const [isStoreReady, setIsStoreReady] = useState(false);
@@ -380,6 +401,10 @@ export default function App() {
   const activeTone = activeLookup ? riskLevelToneMap[activeLookup.result.assessment.level] : riskLevelToneMap.unknown;
   const markdown = useMemo(() => (activeLookup ? toMarkdown(activeLookup) : ""), [activeLookup]);
   const deriveRiskBrief = useMemo(() => (activeLookup ? toDeriveRiskBrief(activeLookup) : ""), [activeLookup]);
+  const activeRiskBrief = useMemo(
+    () => (activeLookup ? buildSentinelRiskBrief({ lookup: activeLookup.result }) : null),
+    [activeLookup],
+  );
 
   const toggleFlag = (flagId: ReviewFlagId) => {
     setSelectedFlags((current) =>
@@ -438,6 +463,55 @@ export default function App() {
       setNotice("Derive risk brief copied.");
     } catch {
       setNotice("Clipboard copy failed. Export still works.");
+    }
+  };
+
+  const copyRiskBrief = async (consumer: SentinelRiskBriefConsumer = "derive") => {
+    if (!activeLookup) return;
+    const payload = buildSentinelRiskBrief({
+      lookup: activeLookup.result,
+      recommendedConsumers: [consumer],
+    });
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+      setNotice(`Risk brief copied for ${consumer}.`);
+    } catch {
+      setNotice("Clipboard copy failed. Export still works.");
+    }
+  };
+
+  const exportRiskBrief = () => {
+    if (!activeLookup) return;
+    downloadJsonFile(
+      buildSentinelRiskBrief({ lookup: activeLookup.result }),
+      `tenra-sentinel-risk-brief-${todayForFilename()}.json`,
+    );
+    setNotice("Risk brief export created.");
+  };
+
+  const importRiskBrief = () => {
+    if (!handoffJson.trim()) {
+      setNotice("Paste a Sentinel risk brief before importing.");
+      return;
+    }
+
+    try {
+      const brief = parseSentinelRiskBrief(JSON.parse(handoffJson));
+      const saved: SavedLookup = {
+        id: createId(),
+        phoneNumber: brief.lookup.query.rawInput,
+        regionHint: brief.lookup.query.regionHint ?? "",
+        note: brief.handoff.questionForDerive,
+        selectedFlags: [],
+        result: brief.lookup,
+      };
+      setSavedLookups((current) => [saved, ...current]);
+      setActiveId(saved.id);
+      setImportedRiskBrief(brief);
+      setNotice(`Imported ${brief.schema}; ready for ${brief.handoff.recommendedConsumers.join(", ")}.`);
+    } catch (error) {
+      setImportedRiskBrief(null);
+      setNotice(error instanceof Error ? error.message : "Risk brief import failed.");
     }
   };
 
@@ -566,6 +640,29 @@ export default function App() {
           </p>
         </section>
 
+        <section className="lookup-form" aria-label="Risk brief handoff inbox">
+          <label>
+            Risk brief JSON
+            <textarea
+              placeholder='{"schema":"tenra-sentinel.risk-brief.v1",...}'
+              value={handoffJson}
+              onChange={(event) => setHandoffJson(event.target.value)}
+            />
+          </label>
+          <button type="button" onClick={importRiskBrief}>
+            Import Risk Brief
+          </button>
+          {importedRiskBrief ? (
+            <div className="history-actions">
+              {importedRiskBrief.handoff.recommendedConsumers.map((consumer) => (
+                <button key={consumer} type="button" onClick={() => void copyRiskBrief(consumer)}>
+                  Send {consumer}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </section>
+
         <nav className="history-list" aria-label="Lookup history">
           {savedLookups.map((lookup) => (
             <button
@@ -656,11 +753,17 @@ export default function App() {
                   <button type="button" onClick={copyDeriveBrief}>
                     Copy Derive Brief
                   </button>
+                  <button type="button" onClick={() => void copyRiskBrief("guardrail")}>
+                    Send Guardrail
+                  </button>
+                  <button type="button" onClick={exportRiskBrief}>
+                    Risk JSON
+                  </button>
                   <button type="button" onClick={exportMarkdown}>
                     Export
                   </button>
                 </div>
-                <pre>{markdown}</pre>
+                <pre>{activeRiskBrief ? JSON.stringify(activeRiskBrief, null, 2) : markdown}</pre>
               </section>
             </div>
           </>
