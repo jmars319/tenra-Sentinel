@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent } from "react";
 import type { PhoneLookupResult } from "@sentinel/api-contracts";
 import { sentinelAppName } from "@sentinel/config";
 import {
@@ -26,6 +27,12 @@ type SavedLookup = {
   note: string;
   selectedFlags: ReviewFlagId[];
   result: PhoneLookupResult;
+};
+
+type SentinelHistoryExport = {
+  exportedAt: string;
+  lookups: SavedLookup[];
+  schema: "tenra-sentinel-desktop-history:v1";
 };
 
 type ReviewFlag = {
@@ -82,6 +89,8 @@ const createId = () =>
     : `sentinel-${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 const nowIso = () => new Date().toISOString();
+
+const todayForFilename = () => new Date().toISOString().slice(0, 10);
 
 const normalizePhoneNumber = (input: string): string => {
   const trimmed = input.trim();
@@ -216,6 +225,34 @@ const loadSavedLookups = () => {
   return [];
 };
 
+const isSavedLookup = (value: unknown): value is SavedLookup => {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<SavedLookup>;
+
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.phoneNumber === "string" &&
+    typeof candidate.regionHint === "string" &&
+    typeof candidate.note === "string" &&
+    Array.isArray(candidate.selectedFlags) &&
+    Boolean(candidate.result)
+  );
+};
+
+const parseHistoryImport = (input: unknown): SavedLookup[] => {
+  const lookups = Array.isArray(input)
+    ? input
+    : input && typeof input === "object" && Array.isArray((input as Partial<SentinelHistoryExport>).lookups)
+      ? (input as Partial<SentinelHistoryExport>).lookups
+      : null;
+
+  if (!lookups || !lookups.every(isSavedLookup)) {
+    throw new Error("Sentinel history JSON must contain lookup records.");
+  }
+
+  return lookups;
+};
+
 const formatTime = (iso: string) =>
   new Intl.DateTimeFormat(undefined, {
     month: "short",
@@ -286,6 +323,7 @@ const toDeriveRiskBrief = (saved: SavedLookup) => {
 };
 
 export default function App() {
+  const importInputRef = useRef<HTMLInputElement>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [regionHint, setRegionHint] = useState("US");
   const [note, setNote] = useState("");
@@ -416,6 +454,41 @@ export default function App() {
     setNotice("Markdown export created.");
   };
 
+  const exportHistory = () => {
+    const payload: SentinelHistoryExport = {
+      exportedAt: nowIso(),
+      lookups: savedLookups,
+      schema: "tenra-sentinel-desktop-history:v1",
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `tenra-sentinel-history-${todayForFilename()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setNotice("Lookup history export created.");
+  };
+
+  const importHistory = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+
+    try {
+      const lookups = parseHistoryImport(JSON.parse(await file.text()));
+      setSavedLookups(lookups);
+      setActiveId(lookups[0]?.id ?? "");
+      setNotice(`Imported ${lookups.length} lookup record(s).`);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Lookup history import failed.");
+    }
+  };
+
   return (
     <main className="desktop-shell">
       <aside className="lookup-sidebar">
@@ -473,6 +546,21 @@ export default function App() {
           <button disabled={isRunning} type="button" onClick={runLookup}>
             {isRunning ? "Running..." : "Run Lookup"}
           </button>
+          <div className="history-actions">
+            <button type="button" onClick={exportHistory}>
+              Export History
+            </button>
+            <button type="button" onClick={() => importInputRef.current?.click()}>
+              Import History
+            </button>
+          </div>
+          <input
+            ref={importInputRef}
+            className="hidden-file-input"
+            type="file"
+            accept="application/json"
+            onChange={importHistory}
+          />
           <p className="notice" role="status">
             {notice}
           </p>

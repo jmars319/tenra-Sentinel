@@ -170,6 +170,28 @@ textarea {
   font-weight: 800;
 }
 
+.history-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.history-actions button {
+  background: #fffdfa;
+  border-color: #cabca8;
+  color: #17222f;
+}
+
+.hidden-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .notice {
   min-height: 1.35em;
   font-size: 0.9rem;
