@@ -17,7 +17,7 @@ import {
 import { redactPhoneNumber } from "@sentinel/privacy";
 import type { EvidenceDirection } from "@sentinel/shared-types";
 import { confidenceBandCopy, riskLevelToneMap } from "@sentinel/ui";
-import { parseSentinelRiskBrief } from "@sentinel/validation";
+import { parseDeriveReasoningBriefContext, parseSentinelRiskBrief, type DeriveReasoningBriefContext } from "@sentinel/validation";
 import { readDesktopStore, readLegacyLocalStorage, writeDesktopStore } from "./lib/desktopStore";
 
 type ReviewFlagId =
@@ -40,16 +40,6 @@ type SentinelHistoryExport = {
   exportedAt: string;
   lookups: SavedLookup[];
   schema: "tenra-sentinel-desktop-history:v1";
-};
-
-type DeriveReasoningBriefContext = {
-  schema: "tenra-derive.reasoning-brief.v1";
-  exportedAt: string;
-  question: string;
-  answerText: string;
-  confidence: string;
-  summary: string;
-  openQuestions: string[];
 };
 
 type ReviewFlag = {
@@ -281,35 +271,6 @@ const parseHistoryImport = (input: unknown): SavedLookup[] => {
   }
 
   return lookups;
-};
-
-const parseDeriveReasoningBriefContext = (input: unknown): DeriveReasoningBriefContext => {
-  const candidate = input && typeof input === "object" ? (input as Record<string, unknown>) : {};
-  const question = candidate.question && typeof candidate.question === "object" ? candidate.question as Record<string, unknown> : {};
-  const answer = candidate.answer && typeof candidate.answer === "object" ? candidate.answer as Record<string, unknown> : {};
-  const handoff = candidate.handoff && typeof candidate.handoff === "object" ? candidate.handoff as Record<string, unknown> : {};
-  const openQuestions = Array.isArray(handoff.openQuestions) ? handoff.openQuestions.filter((item): item is string => typeof item === "string") : [];
-
-  if (
-    candidate.schema !== "tenra-derive.reasoning-brief.v1" ||
-    typeof candidate.exportedAt !== "string" ||
-    typeof question.text !== "string" ||
-    typeof answer.answerText !== "string" ||
-    typeof answer.confidence !== "string" ||
-    typeof handoff.summary !== "string"
-  ) {
-    throw new Error("Derive reasoning brief JSON is missing required Sentinel review context fields.");
-  }
-
-  return {
-    schema: "tenra-derive.reasoning-brief.v1",
-    exportedAt: candidate.exportedAt,
-    question: question.text,
-    answerText: answer.answerText,
-    confidence: answer.confidence,
-    summary: handoff.summary,
-    openQuestions,
-  };
 };
 
 const formatTime = (iso: string) =>

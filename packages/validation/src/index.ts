@@ -128,3 +128,42 @@ export const sentinelRiskBriefSchema = z.object({
 
 export const parseSentinelRiskBrief = (input: unknown): SentinelRiskBrief =>
   sentinelRiskBriefSchema.parse(input);
+
+export const deriveReasoningBriefContextSchema = z.object({
+  schema: z.literal("tenra-derive.reasoning-brief.v1"),
+  exportedAt: isoTimestampSchema,
+  question: z.object({
+    text: z.string().min(1)
+  }).passthrough(),
+  answer: z.object({
+    answerText: z.string().min(1),
+    confidence: z.string().min(1)
+  }).passthrough(),
+  handoff: z.object({
+    summary: z.string().min(1),
+    openQuestions: z.array(z.string().min(1))
+  }).passthrough()
+}).passthrough();
+
+export type DeriveReasoningBriefContext = {
+  schema: "tenra-derive.reasoning-brief.v1";
+  exportedAt: string;
+  question: string;
+  answerText: string;
+  confidence: string;
+  summary: string;
+  openQuestions: string[];
+};
+
+export const parseDeriveReasoningBriefContext = (input: unknown): DeriveReasoningBriefContext => {
+  const parsed = deriveReasoningBriefContextSchema.parse(input);
+  return {
+    schema: parsed.schema,
+    exportedAt: parsed.exportedAt,
+    question: parsed.question.text,
+    answerText: parsed.answer.answerText,
+    confidence: parsed.answer.confidence,
+    summary: parsed.handoff.summary,
+    openQuestions: parsed.handoff.openQuestions
+  };
+};
