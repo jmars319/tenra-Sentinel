@@ -40,7 +40,8 @@ a {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -165,6 +166,17 @@ input {
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.75);
   color: var(--ink);
+}
+
+.field textarea {
+  width: 100%;
+  min-height: 136px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink);
+  resize: vertical;
 }
 
 .field-row {

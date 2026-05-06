@@ -1,8 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { buildSentinelRiskBrief, type PhoneLookupResult } from "@sentinel/api-contracts";
+import {
+  buildSentinelRiskBrief,
+  type PhoneLookupResult,
+  type SentinelRiskBrief
+} from "@sentinel/api-contracts";
 import { riskLevelToneMap } from "@sentinel/ui";
+import { parseSentinelRiskBrief } from "@sentinel/validation";
 
 interface ApiErrorPayload {
   error?: string;
@@ -13,6 +18,9 @@ export function PhoneLookupForm() {
   const [regionHint, setRegionHint] = useState("US");
   const [result, setResult] = useState<PhoneLookupResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [riskBriefJson, setRiskBriefJson] = useState("");
+  const [importedRiskBrief, setImportedRiskBrief] = useState<SentinelRiskBrief | null>(null);
+  const [handoffMessage, setHandoffMessage] = useState("Paste a Sentinel risk brief to review it here.");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -39,6 +47,7 @@ export function PhoneLookupForm() {
 
       const payload = (await response.json()) as PhoneLookupResult;
       setResult(payload);
+      setImportedRiskBrief(null);
     } catch (submitError) {
       setResult(null);
       setError(
@@ -46,6 +55,26 @@ export function PhoneLookupForm() {
       );
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRiskBriefImport = () => {
+    if (!riskBriefJson.trim()) {
+      setHandoffMessage("Paste a Sentinel risk brief before importing.");
+      return;
+    }
+
+    try {
+      const brief = parseSentinelRiskBrief(JSON.parse(riskBriefJson));
+      setResult(brief.lookup);
+      setPhoneNumber(brief.lookup.query.rawInput);
+      setRegionHint(brief.lookup.query.regionHint ?? "US");
+      setImportedRiskBrief(brief);
+      setError(null);
+      setHandoffMessage(`Imported ${brief.schema} for ${brief.handoff.recommendedConsumers.join(", ")}.`);
+    } catch (importError) {
+      setImportedRiskBrief(null);
+      setHandoffMessage(importError instanceof Error ? importError.message : "Risk brief import failed.");
     }
   };
 
@@ -90,6 +119,30 @@ export function PhoneLookupForm() {
       </form>
 
       {error ? <p className="muted">{error}</p> : null}
+
+      <section className="result-card handoff-import">
+        <div className="result-header">
+          <div>
+            <strong>Risk brief inbox</strong>
+            <p>Import Sentinel handoffs from Derive, Guardrail, Assembly, or manual review.</p>
+          </div>
+          <span className="pill">tenra-sentinel.risk-brief.v1</span>
+        </div>
+        <div className="lookup-form">
+          <label className="field">
+            <span>Risk brief JSON</span>
+            <textarea
+              rows={5}
+              value={riskBriefJson}
+              onChange={(event) => setRiskBriefJson(event.target.value)}
+            />
+          </label>
+          <button type="button" onClick={handleRiskBriefImport}>
+            Import risk brief
+          </button>
+          <p className="muted">{handoffMessage}</p>
+        </div>
+      </section>
 
       {result ? (
         <section className="result-card" style={{ borderLeftColor: accent }}>
@@ -152,6 +205,12 @@ export function PhoneLookupForm() {
               <strong>Handoff</strong>
               <p>{riskBrief.schema}</p>
               <p>{riskBrief.handoff.recommendedConsumers.join(", ")}</p>
+              {importedRiskBrief ? (
+                <p>
+                  Imported source: {importedRiskBrief.sourceApp}; action posture{" "}
+                  {importedRiskBrief.handoff.actionPosture}.
+                </p>
+              ) : null}
             </div>
           ) : null}
         </section>
