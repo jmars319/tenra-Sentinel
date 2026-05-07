@@ -1,64 +1,74 @@
 # tenra Sentinel
 
-tenra Sentinel is an explainable signal-aggregation engine that synthesizes fragmented data
-sources into calm, confidence-weighted risk assessments.
+tenra Sentinel is an explainable signal-aggregation system for turning fragmented evidence into confidence-weighted risk assessments. Its role is to gather signals, preserve provenance, expose uncertainty, and make assessments reviewable.
 
-It is not a blocker, not a search engine, and not an AI oracle. The intended role is a
-reasoning layer: gather signals, preserve evidence and provenance, weigh uncertainty, and
-return structured assessments that are understandable enough to inspect.
+The first concrete use case is suspicious phone-number lookup. Sentinel is not a blocker, search engine, or AI oracle.
 
-The first concrete use case is suspicious phone-number lookup. The product direction is
-desktop-first, with web second for hosted/API review surfaces and mobile third for later
-lightweight review.
+## Operational Purpose
 
-## Repo structure
+- Collect and normalize risk signals from bounded sources.
+- Preserve evidence and confidence instead of returning opaque labels.
+- Give operators a review desk for manual signal interpretation.
+- Keep assessment logic understandable enough to inspect and challenge.
+
+## Design Posture
+
+- Evidence, provenance, and uncertainty are product primitives.
+- Desktop-first review workflow with web/API support.
+- Local pattern review before broader provider integrations.
+- Shared contracts define lookup and assessment behavior.
+- Mobile remains a later lightweight review surface.
+
+## Architecture
 
 ```text
 apps/
   desktopapp/   Primary Tauri operator surface
-  webapp/       Secondary hosted/API review surface
-  mobileapp/    Third-surface Expo scaffold for later lightweight review
+  webapp/       Next.js hosted/API review surface
+  mobileapp/    Expo scaffold for future lightweight review
 
 packages/
-  shared-types/ Cross-cutting primitive types
-  domain/       Signals, evidence, assessments, job lifecycle
-  api-contracts/ Shared request/response shapes
+  domain/       Signals, evidence, assessments, and job lifecycle
+  api-contracts/ Shared request and response shapes
   validation/   Runtime schemas
-  realtime/     Future lookup progress events
-  auth/         Minimal auth/session models
-  geo/          Future geographic clustering types
   privacy/      Redaction-safe helpers
-  ui/           Shared presentation tokens
-  config/       App identity and env helpers
-
-scripts/        Bootstrap, dev, verify, doctor
-docs/           Developer and repo documentation
-archive/        Reserved for retired experiments
+  realtime/     Future progress events
+  ui/           Shared presentation primitives
+  config/       Product identity and environment helpers
 ```
 
-## Core commands
+## Current State
+
+- The desktop app runs a local phone lookup and review desk.
+- The shared local pattern-review provider powers both desktop and web API behavior.
+- The desktop app supports manual review signals, evidence weighting, saved history, Markdown export, and JSON import/export.
+- The web app exposes a phone lookup form shell and `/api/lookup/phone`.
+- The mobile app is a valid but intentionally minimal Expo shell.
+
+## Deployment Posture
+
+Sentinel is currently a local-first and development-stage assessment tool. Any live deployment should treat provider coverage, data retention, privacy, and false-positive handling as explicit product and operational decisions.
+
+## Working Locally
 
 ```bash
 pnpm run bootstrap
-pnpm run dev:web
 pnpm run dev:desktop
-pnpm run dev:mobile
-pnpm run dev:both
-pnpm run launch:desktop
+pnpm run dev:web
 pnpm run verify:all
 pnpm run doctor
 ```
 
-## Current product state
+Use `pnpm run dev:mobile` only when working on the scaffolded mobile surface.
 
-- The desktop app is the primary surface and now runs a local phone lookup/review desk with offline number-pattern review, manual review signals, evidence weighting, saved history, Markdown export, and JSON lookup-history import/export.
-- The web app boots with a tenra Sentinel-specific homepage and a phone lookup form shell.
-- The web app exposes `/api/lookup/phone` using shared contracts, validation, and the same local pattern-review provider.
-- The mobile app is a valid Expo shell kept intentionally minimal.
-- Shared packages define the initial tenra Sentinel vocabulary so product logic can expand without
-  bloating the app layers.
+## Direction
 
-## Next reading
+- Improve assessment vocabulary and evidence weighting.
+- Add provider integrations only behind clear provenance boundaries.
+- Keep human review available for ambiguous assessments.
+- Build toward stable risk summaries without claiming certainty where the evidence is weak.
+
+## Related Documentation
 
 - [Developer Guide](docs/DEVELOPER_GUIDE.md)
 - [Repo Map](docs/REPO_MAP.md)
