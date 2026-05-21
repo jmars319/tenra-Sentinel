@@ -4,8 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const suiteRoot = path.resolve(repoRoot, "..");
-const deriveBriefPath = path.join(suiteRoot, "tenra Derive/fixtures/handoffs/reasoning-brief.json");
+const suiteRoot = process.env.TENRA_SUITE_ROOT?.trim() || path.resolve(repoRoot, "../../..");
+const deriveBriefPath = path.join(suiteRoot, "capabilities/reasoning/tenra Derive/fixtures/handoffs/reasoning-brief.json");
 
 function assert(condition, message) {
   if (!condition) {
