@@ -39,6 +39,16 @@ pnpm run doctor
 `doctor` is the broader health check: environment, workspace structure, lint, typecheck,
 and app build validation.
 
+## Local Tooling
+
+The shared local machine baseline supports Sentinel's risk-review and desktop workflows:
+
+- Use `cargo audit`, `cargo deny`, and `sccache` around Tauri/Rust work in `apps/desktopapp/src-tauri`.
+- Use `actionlint` before changing GitHub Actions workflows.
+- Use `shellcheck` and `shfmt` when editing repo scripts.
+- Use `osv-scanner` for dependency advisory checks across package manifests.
+- Use `pa11y` and `lighthouse` against the running web or desktop-served UI when review screens change.
+
 ## Shared-domain-first architecture
 
 tenra Sentinel is intentionally organized around packages before app features:
