@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default capability for tenra Sentinel",
+  "description": "Default capability for Sentinel by Tenra",
   "windows": ["main"],
   "permissions": ["core:default"]
 }

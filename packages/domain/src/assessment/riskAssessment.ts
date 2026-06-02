@@ -41,7 +41,7 @@ export const createEvidenceWeightedAssessment = (input: {
     posture = "review";
     headline = "Corroborated risk indicators";
     narrative =
-      "Multiple provider observations point toward elevated risk, but tenra Sentinel still treats the result as evidence-backed rather than certain.";
+      "Multiple provider observations point toward elevated risk, but Sentinel by Tenra still treats the result as evidence-backed rather than certain.";
   } else if (normalizedSignal >= 0.2) {
     level = "moderate";
     posture = "observe";
@@ -53,7 +53,7 @@ export const createEvidenceWeightedAssessment = (input: {
     posture = "observe";
     headline = "Signals lean away from immediate concern";
     narrative =
-      "The current evidence set leans away from risk, but tenra Sentinel does not treat low-risk evidence as a guarantee.";
+      "The current evidence set leans away from risk, but Sentinel by Tenra does not treat low-risk evidence as a guarantee.";
   }
 
   return {
@@ -82,7 +82,7 @@ export const createInsufficientSignalAssessment = (input: {
   const evidence = input.evidence ?? [];
   const note =
     input.note ??
-    "tenra Sentinel has not gathered enough corroborated signals to move beyond a neutral, explainable assessment.";
+    "Sentinel by Tenra has not gathered enough corroborated signals to move beyond a neutral, explainable assessment.";
 
   return {
     level: "unknown",

@@ -4,7 +4,7 @@ import { PhoneLookupForm } from "../components/phone-lookup-form";
 const sourceReadiness = [
   {
     title: "Signal synthesis",
-    body: "tenra Sentinel is designed to gather fragmented observations, preserve their provenance, and return a reasoned posture instead of a binary verdict."
+    body: "Sentinel by Tenra is designed to gather fragmented observations, preserve their provenance, and return a reasoned posture instead of a binary verdict."
   },
   {
     title: "Confidence-weighted output",
@@ -32,7 +32,7 @@ export default function HomePage() {
     <main className="shell">
       <section className="hero">
         <div className="masthead">
-          <span className="eyebrow">tenra Sentinel · reasoning layer</span>
+          <span className="eyebrow">Sentinel by Tenra · reasoning layer</span>
           <h1>{sentinelAppName}</h1>
           <p>{sentinelTagline}</p>
           <p>

@@ -3,7 +3,7 @@ use tauri::{
     Manager, Runtime,
 };
 
-const APP_NAME: &str = "tenra Sentinel";
+const APP_NAME: &str = "Sentinel by Tenra";
 const MENU_SETTINGS: &str = "settings";
 const MENU_CLOSE_WINDOW: &str = "close-window";
 const MENU_QUIT: &str = "quit";
@@ -37,7 +37,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![health_ping])
         .build(tauri::generate_context!())
-        .expect("error while building tenra Sentinel desktop");
+        .expect("error while building Sentinel by Tenra desktop");
 
     app.run(|app_handle, event| match event {
         #[cfg(target_os = "macos")]

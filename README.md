@@ -1,6 +1,6 @@
-# tenra Sentinel
+# Sentinel by Tenra
 
-tenra Sentinel is an explainable signal-aggregation system for turning fragmented evidence into confidence-weighted risk assessments. Its role is to gather signals, preserve provenance, expose uncertainty, and make assessments reviewable.
+Sentinel by Tenra is an explainable signal-aggregation system for turning fragmented evidence into confidence-weighted risk assessments. Its role is to gather signals, preserve provenance, expose uncertainty, and make assessments reviewable.
 
 The first concrete use case is suspicious phone-number lookup. Sentinel is not a blocker, search engine, or AI oracle.
 

@@ -8,7 +8,7 @@ Runs as a complete risk lookup and brief review app with local lookup state, ris
 
 ## Repository Path
 
-`capabilities/risk/tenra Sentinel`
+`capabilities/risk/Sentinel by Tenra`
 
 ## Required Suite Dependencies
 

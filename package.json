@@ -17,7 +17,7 @@
     "build:desktop": "pnpm --filter @sentinel/desktopapp run tauri:build",
     "package:desktop": "pnpm --filter @sentinel/desktopapp exec tauri build --bundles app",
     "install:desktop": "pnpm run package:desktop && bash ./scripts/install-desktop-app.sh",
-    "launch:desktop": "open -n \"/Applications/tenra Sentinel.app\"",
+    "launch:desktop": "open -n \"/Applications/Sentinel by Tenra.app\"",
     "verify:web": "./scripts/verify-web.sh",
     "verify:desktop": "./scripts/verify-desktop.sh",
     "verify:mobile": "./scripts/verify-mobile.sh",
@@ -40,5 +40,6 @@
     "globals": "^15.14.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.24.1"
-  }
+  },
+  "description": "Sentinel by Tenra is a local risk review workbench for evidence-weighted assessment and handoffs."
 }

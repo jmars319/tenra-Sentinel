@@ -85,7 +85,7 @@ export const orchestratePhoneLookup = async (
         sources: sourceSummaries,
         evidence,
         note:
-          "tenra Sentinel completed the provider orchestration step, but no meaningful phone-risk evidence is available yet."
+          "Sentinel by Tenra completed the provider orchestration step, but no meaningful phone-risk evidence is available yet."
       });
 
   return {

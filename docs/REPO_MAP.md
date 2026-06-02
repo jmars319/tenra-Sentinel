@@ -1,4 +1,4 @@
-# tenra Sentinel Repo Map
+# Sentinel by Tenra Repo Map
 
 ## Apps
 
@@ -29,7 +29,7 @@ source identifiers, and target kinds.
 
 ### `packages/domain`
 
-The heart of tenra Sentinel’s vocabulary: signals, evidence, source observations, reasoning
+The heart of Sentinel by Tenra’s vocabulary: signals, evidence, source observations, reasoning
 summaries, risk assessments, and lookup job state.
 
 ### `packages/api-contracts`

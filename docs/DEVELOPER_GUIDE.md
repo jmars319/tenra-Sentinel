@@ -1,4 +1,4 @@
-# tenra Sentinel Developer Guide
+# Sentinel by Tenra Developer Guide
 
 ## Bootstrap
 
@@ -51,7 +51,7 @@ The shared local machine baseline supports Sentinel's risk-review and desktop wo
 
 ## Shared-domain-first architecture
 
-tenra Sentinel is intentionally organized around packages before app features:
+Sentinel by Tenra is intentionally organized around packages before app features:
 
 - `@sentinel/shared-types` holds basic cross-cutting types like confidence, risk level,
   timestamps, and source identifiers.
@@ -79,7 +79,7 @@ When adding a new app:
 2. Keep business logic in packages unless it is purely UI or platform glue.
 3. Add root scripts only if the new app needs a standard daily workflow command.
 
-## Practical tenra Sentinel guidance
+## Practical Sentinel by Tenra guidance
 
 - Avoid binary certainty in new assessment models.
 - Preserve source provenance in any new enrichment pipeline.

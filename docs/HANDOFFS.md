@@ -1,6 +1,6 @@
-# tenra Sentinel Handoffs
+# Sentinel by Tenra Handoffs
 
-tenra Sentinel stays unique as a shared signal and risk assessment app. Phone lookup is the first concrete use case, not the whole product boundary.
+Sentinel by Tenra stays unique as a shared signal and risk assessment app. Phone lookup is the first concrete use case, not the whole product boundary.
 
 ## Produces
 
