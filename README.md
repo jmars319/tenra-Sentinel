@@ -25,7 +25,7 @@ The first concrete use case is suspicious phone-number lookup. Sentinel is not a
 apps/
   desktopapp/   Primary Tauri operator surface
   webapp/       Next.js hosted/API review surface
-  mobileapp/    Expo scaffold for future lightweight review
+  mobileapp/    Reserved Expo surface for future lightweight review
 
 packages/
   domain/       Signals, evidence, assessments, and job lifecycle
@@ -59,7 +59,7 @@ pnpm run verify:all
 pnpm run doctor
 ```
 
-Use `pnpm run dev:mobile` only when working on the scaffolded mobile surface.
+Use `pnpm run dev:mobile` only when working on the reserved mobile surface.
 
 ## Direction
 

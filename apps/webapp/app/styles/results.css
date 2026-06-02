@@ -1,0 +1,64 @@
+.meta-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 26px;
+}
+
+.panel {
+  padding: 22px;
+  border-radius: 24px;
+}
+
+.status-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.result-card {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 24px;
+  border-left: 5px solid var(--surface-deep);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(95, 83, 55, 0.08);
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+.result-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.result-block {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(95, 83, 55, 0.12);
+}
+
+.result-block ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.muted {
+  color: var(--ink-soft);
+}

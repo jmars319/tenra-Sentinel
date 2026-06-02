@@ -23,12 +23,15 @@
     "verify:mobile": "./scripts/verify-mobile.sh",
     "verify:handoffs": "node ./scripts/validate-handoffs.mjs",
     "verify:derive-roundtrip": "node ./scripts/verify-derive-roundtrip.mjs",
-    "verify:all": "./scripts/verify-all.sh",
+    "verify:all": "./scripts/verify-all.sh && pnpm run audit:maintainability && pnpm run budget:bundle",
     "doctor": "./scripts/doctor.sh",
     "lint": "pnpm exec eslint .",
     "typecheck:packages": "pnpm -r --filter './packages/*' run typecheck",
     "typecheck": "pnpm run typecheck:packages && pnpm --filter @sentinel/webapp run typecheck && pnpm --filter @sentinel/desktopapp run typecheck && pnpm --filter @sentinel/mobileapp run typecheck",
-    "build": "pnpm run verify:all"
+    "build": "pnpm run verify:all",
+    "analyze:bundle": "node scripts/analyze-build.mjs",
+    "budget:bundle": "node scripts/analyze-build.mjs --strict",
+    "audit:maintainability": "node scripts/audit-maintainability.mjs --strict"
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",

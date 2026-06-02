@@ -17,8 +17,8 @@
     "@sentinel/domain": "workspace:*",
     "@sentinel/privacy": "workspace:*",
     "@sentinel/shared-types": "workspace:*",
-    "@sentinel/validation": "workspace:*",
     "@sentinel/ui": "workspace:*",
+    "@sentinel/validation": "workspace:*",
     "@tauri-apps/api": "^2.11.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -27,7 +27,7 @@
     "@tauri-apps/cli": "^2.11.2",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^6.0.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.1"
   }

@@ -23,9 +23,12 @@ assert(typeof brief.answer?.confidence === "string", "Derive fixture missing con
 assert(typeof brief.handoff?.summary === "string" && brief.handoff.summary.length > 0, "Derive fixture missing handoff summary");
 assert(Array.isArray(brief.handoff?.openQuestions), "Derive fixture missing open questions");
 
-const appSource = fs.readFileSync(path.join(repoRoot, "apps/desktopapp/src/App.tsx"), "utf8");
+const desktopSources = [
+  "apps/desktopapp/src/hooks/useSentinelDesk.ts",
+  "apps/desktopapp/src/components/SentinelSidebar.tsx"
+].map((relativePath) => fs.readFileSync(path.join(repoRoot, relativePath), "utf8"));
 assert(
-  appSource.includes("parseDeriveReasoningBriefContext"),
+  desktopSources.some((source) => source.includes("parseDeriveReasoningBriefContext")),
   "Sentinel desktop app should import Derive reasoning briefs as review context"
 );
 

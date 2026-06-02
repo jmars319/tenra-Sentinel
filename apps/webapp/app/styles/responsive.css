@@ -1,0 +1,17 @@
+@media (max-width: 900px) {
+  .hero,
+  .meta-grid,
+  .result-grid,
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+
+  .shell {
+    padding-top: 20px;
+  }
+
+  .masthead,
+  .lookup-card {
+    padding: 24px;
+  }
+}

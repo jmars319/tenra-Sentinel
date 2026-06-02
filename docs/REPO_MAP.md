@@ -17,7 +17,7 @@ assessments.
 
 ### `apps/mobileapp`
 
-Third-surface Expo scaffold for future mobile intake and lightweight review workflows.
+Third-surface Expo shell reserved for future mobile intake and lightweight review workflows.
 Kept minimal until desktop and web workflows justify a concrete mobile use case.
 
 ## Packages

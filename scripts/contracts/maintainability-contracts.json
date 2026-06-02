@@ -1,0 +1,275 @@
+{
+  "packageName": "tenra-sentinel",
+  "packageScripts": [
+    "analyze:bundle",
+    "audit:maintainability",
+    "bootstrap",
+    "budget:bundle",
+    "build",
+    "build:desktop",
+    "check:env",
+    "check:packages",
+    "dev:both",
+    "dev:desktop",
+    "dev:mobile",
+    "dev:web",
+    "doctor",
+    "install:desktop",
+    "launch:desktop",
+    "lint",
+    "package:desktop",
+    "typecheck",
+    "typecheck:packages",
+    "verify:all",
+    "verify:derive-roundtrip",
+    "verify:desktop",
+    "verify:handoffs",
+    "verify:mobile",
+    "verify:web"
+  ],
+  "workspacePackages": [
+    {
+      "path": "apps/desktopapp/package.json",
+      "name": "@sentinel/desktopapp",
+      "exports": null
+    },
+    {
+      "path": "apps/mobileapp/package.json",
+      "name": "@sentinel/mobileapp",
+      "exports": null
+    },
+    {
+      "path": "apps/webapp/package.json",
+      "name": "@sentinel/webapp",
+      "exports": null
+    },
+    {
+      "path": "packages/api-contracts/package.json",
+      "name": "@sentinel/api-contracts",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/auth/package.json",
+      "name": "@sentinel/auth",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/config/package.json",
+      "name": "@sentinel/config",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/domain/package.json",
+      "name": "@sentinel/domain",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/geo/package.json",
+      "name": "@sentinel/geo",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/privacy/package.json",
+      "name": "@sentinel/privacy",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/realtime/package.json",
+      "name": "@sentinel/realtime",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/shared-types/package.json",
+      "name": "@sentinel/shared-types",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/ui/package.json",
+      "name": "@sentinel/ui",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    },
+    {
+      "path": "packages/validation/package.json",
+      "name": "@sentinel/validation",
+      "exports": {
+        ".": {
+          "types": "./src/index.ts",
+          "default": "./src/index.ts"
+        }
+      }
+    }
+  ],
+  "packageExports": {
+    "packages/api-contracts/src/index.ts": [
+      "HealthStatusResponse",
+      "LookupResultNotice",
+      "PhoneLookupQuery",
+      "PhoneLookupResult",
+      "SentinelGuardrailReviewRequest",
+      "SentinelRiskBrief",
+      "SentinelRiskBriefConsumer",
+      "buildSentinelGuardrailReviewRequest",
+      "buildSentinelRiskBrief"
+    ],
+    "packages/auth/src/index.ts": [
+      "AuthActor",
+      "SentinelSession",
+      "SessionScope",
+      "hasScope"
+    ],
+    "packages/config/src/index.ts": [
+      "SentinelEnvKey",
+      "readEnv",
+      "sentinelAppName",
+      "sentinelApps",
+      "sentinelEnvKeys",
+      "sentinelTagline"
+    ],
+    "packages/domain/src/index.ts": [],
+    "packages/geo/src/index.ts": [
+      "GeoCluster",
+      "GeoPoint",
+      "RegionHint"
+    ],
+    "packages/privacy/src/index.ts": [
+      "ExposurePosture",
+      "RedactionResult",
+      "redactPhoneNumber"
+    ],
+    "packages/realtime/src/index.ts": [
+      "LookupProgressEvent",
+      "LookupRealtimeEvent",
+      "LookupRealtimeEventBase",
+      "LookupStateChangedEvent",
+      "RealtimeEventKind"
+    ],
+    "packages/shared-types/src/index.ts": [
+      "ConfidenceBand",
+      "ConfidenceBandLabel",
+      "ConfidenceScore",
+      "CountryCode",
+      "EvidenceDirection",
+      "Id",
+      "IsoTimestamp",
+      "LookupTargetKind",
+      "RiskLevel",
+      "SourceId",
+      "clampConfidenceScore",
+      "confidenceBandFromScore"
+    ],
+    "packages/ui/src/index.ts": [
+      "confidenceBandCopy",
+      "riskLevelToneMap",
+      "sentinelTokens"
+    ],
+    "packages/validation/src/index.ts": [
+      "DeriveReasoningBriefContext",
+      "confidenceAssessmentSchema",
+      "confidenceBandSchema",
+      "deriveReasoningBriefContextSchema",
+      "evidenceItemSchema",
+      "healthStatusResponseSchema",
+      "isoTimestampSchema",
+      "lookupJobSchema",
+      "parseDeriveReasoningBriefContext",
+      "parseSentinelRiskBrief",
+      "phoneLookupQuerySchema",
+      "phoneLookupResultSchema",
+      "reasoningSummarySchema",
+      "riskAssessmentSchema",
+      "riskLevelSchema",
+      "sentinelRiskBriefSchema",
+      "sourceIdSchema",
+      "sourceObservationSchema"
+    ]
+  },
+  "schemaIds": [
+    "tenra-align.alignment-snapshot.v1",
+    "tenra-align.review-reply-route.v1",
+    "tenra-assembly.proxy-notice-handoff.v1",
+    "tenra-derive.reasoning-brief.v1",
+    "tenra-facet.orientation-packet.v1",
+    "tenra-guardrail.external-action-decision.v1",
+    "tenra-guardrail.external-action-review.v1",
+    "tenra-partition.lab-validation-request.v1",
+    "tenra-partition.lab-validation-result.v1",
+    "tenra-registry.assembly-document-request.v1",
+    "tenra-registry.ledger-export.v1",
+    "tenra-scout.opportunity-handoff.v1",
+    "tenra-sentinel.risk-brief.v1",
+    "tenra-vicina.workflow-handoff.v1"
+  ],
+  "storageKeys": [
+    "tenra-sentinel-desktop-lookups:v1"
+  ],
+  "tauriCommands": [
+    "health_ping"
+  ],
+  "tauriMenuIds": [
+    "close-window",
+    "quit",
+    "settings"
+  ],
+  "uiSectionIds": [
+    "expected-call",
+    "known-contact",
+    "local-international-shape",
+    "local-nanp-shape",
+    "local-premium-area",
+    "local-repeated-digit-run",
+    "local-reserved-example-pattern",
+    "local-sequential-digits",
+    "local-toll-free-area",
+    "local-unusual-length",
+    "local-zero-block-pattern",
+    "manual-review-note",
+    "payment-pressure",
+    "repeated-contact",
+    "spoofing"
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "label": "tenra-sentinel",
+  "maxImplementationFileLines": 350,
+  "maxStyleFileLines": 160,
+  "maxAppShellLines": 100,
+  "maxDesktopMainLines": 450,
+  "maxDomainBarrelLines": 250,
+  "nearBudgetMarginLines": 25,
+  "nearBudgetMarginKb": 4,
+  "initialBundleBudgetKb": 277,
+  "requireBuiltAssets": true,
+  "sourceRoots": ["apps", "packages", "scripts"],
+  "assetDirs": ["apps/desktopapp/dist/assets"],
+  "routeChunkBudgetsKb": {
+    "apps/desktopapp/dist/assets/index-.*\\.js$": 277
+  },
+  "generatedPatterns": [
+    "dist/",
+    "dist-bundle/",
+    "/dist/",
+    "/build/",
+    "/out/",
+    "/target/",
+    "/gen/",
+    ".next",
+    ".desktop-runtime",
+    "vite-env.d.ts",
+    "next-env.d.ts",
+    "*.tsbuildinfo"
+  ],
+  "allowedGenerated": [
+    "apps/webapp/next-env.d.ts",
+    "apps/desktopapp/src/vite-env.d.ts"
+  ],
+  "bannedImportPatterns": [
+    "/dist/",
+    "/build/",
+    "/target/",
+    "node_modules/",
+    ".next/"
+  ],
+  "bannedStartupImports": {
+    "apps/desktopapp/src/App.tsx": [
+      "@sentinel/api-contracts",
+      "@sentinel/domain",
+      "@sentinel/privacy",
+      "@sentinel/validation",
+      "localStorage",
+      "navigator\\.clipboard"
+    ],
+    "apps/desktopapp/src/AppRoot.tsx": [
+      "@sentinel/api-contracts",
+      "@sentinel/domain",
+      "@sentinel/privacy",
+      "@sentinel/validation",
+      "localStorage",
+      "navigator\\.clipboard"
+    ]
+  },
+  "cssEntryFiles": [
+    "apps/desktopapp/src/styles.css",
+    "apps/webapp/app/globals.css"
+  ],
+  "assetBudgets": [
+    { "path": "apps/desktopapp/src-tauri/icons/icon.png", "maxBytes": 215000 },
+    { "path": "apps/desktopapp/src-tauri/icons/icon.icns", "maxBytes": 775000 },
+    { "path": "apps/desktopapp/src-tauri/icons/icon.ico", "maxBytes": 145000 }
+  ],
+  "contractSnapshotPath": "scripts/contracts/maintainability-contracts.json",
+  "specificFileBudgets": {
+    "scripts/audit-maintainability.mjs": 360
+  }
+}

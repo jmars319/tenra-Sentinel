@@ -1,0 +1,30 @@
+@media (max-width: 1120px) {
+  .desktop-shell,
+  .panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lookup-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #d4c7b4;
+  }
+
+  .history-list {
+    max-height: 240px;
+  }
+}
+
+@media (max-width: 720px) {
+  .lookup-sidebar,
+  .assessment-panel {
+    padding: 14px;
+  }
+
+  .assessment-header {
+    display: grid;
+  }
+
+  .score-card {
+    text-align: left;
+  }
+}
