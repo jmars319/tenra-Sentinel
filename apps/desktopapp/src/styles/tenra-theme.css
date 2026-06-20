@@ -1,4 +1,3 @@
-/* tenra.dev desktop palette */
 :root {
   color-scheme: dark;
   color: #f2f2f5;
@@ -70,7 +69,6 @@ label {
   border-left-color: #09A6D6;
 }
 
-/* JAMARQ/Tenra visual standard */
 :root {
   color-scheme: dark;
   --jamarq-canvas: #0D0D0F;
