@@ -40,6 +40,7 @@ export const useSentinelDesk = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [isStoreReady, setIsStoreReady] = useState(false);
 
+  // Desktop persistence boundary
   useEffect(() => {
     let cancelled = false;
 
@@ -82,6 +83,7 @@ export const useSentinelDesk = () => {
     });
   }, [isStoreReady, savedLookups]);
 
+  // Lookup payload boundary
   const activeLookup = savedLookups.find((lookup) => lookup.id === activeId) ?? savedLookups[0] ?? null;
   const markdown = useMemo(() => (activeLookup ? toMarkdown(activeLookup) : ""), [activeLookup]);
   const deriveRiskBrief = useMemo(() => (activeLookup ? toDeriveRiskBrief(activeLookup) : ""), [activeLookup]);
@@ -90,6 +92,7 @@ export const useSentinelDesk = () => {
     [activeLookup],
   );
 
+  // Risk review boundary
   const toggleFlag = (flagId: ReviewFlagId) => {
     setSelectedFlags((current) =>
       current.includes(flagId) ? current.filter((id) => id !== flagId) : [...current, flagId],
@@ -118,6 +121,7 @@ export const useSentinelDesk = () => {
     }
   };
 
+  // Suite transfer boundary
   const copyText = async (text: string, success: string, fallback: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -172,6 +176,7 @@ export const useSentinelDesk = () => {
     setNotice("Risk brief export created.");
   };
 
+  // Suite inbox boundary
   const importRiskBrief = () => {
     if (!handoffJson.trim()) {
       setNotice("Paste a Sentinel risk brief or Derive reasoning brief before importing.");
@@ -211,6 +216,7 @@ export const useSentinelDesk = () => {
     }
   };
 
+  // Outbound preview boundary
   const previewOutbound = (target: "derive" | "guardrail") => {
     if (!activeRiskBrief) return;
     const payload =
@@ -220,6 +226,7 @@ export const useSentinelDesk = () => {
     setOutboundPreview(JSON.stringify(payload, null, 2));
   };
 
+  // History portability boundary
   const exportMarkdown = () => {
     if (!activeLookup) return;
     const slug = `sentinel-${activeLookup.result.query.maskedPhoneNumber.replace(/[^a-zA-Z0-9]+/g, "-")}`;
